@@ -41,6 +41,7 @@ def upload_file():
             print(f"Parsing error: {e}")
             return f"Error processing file. Please ensure it is the correct GRM Save Variables file. Debug: {e}", 500
 
+        print(f"Processed guilds: {list(log_data.keys())} with entries: {[len(logs) for logs in log_data.values()]}")
         # Store the processed data in the session
         session['grm_log_data'] = log_data
         session['guild_metadata'] = {

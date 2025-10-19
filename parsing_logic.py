@@ -20,52 +20,61 @@ def process_lua_content(lua_content: str) -> dict:
     data = lua_content.splitlines(keepends=True)
 
     # 2. Define Save Table Boundaries (Required for finding LogReport)
-    leftPlayers = []
+    formerMembers = []
     currentMembers = []
-    logReport = []
-    settings = []
-    alts = []
-    backupData = []
+    calendarDetails = []
+    logEntries = []
+    addonSettings = []
+    playerListAlts = []
+    guildDataBackup = []
+    restoreMembers = []
+    restoreFormerMembers = []
+    restoreLog = []
+    miscSettings = []
+    altsList = []
+    dailyAnnouncements = []
 
     saveTables = [
-        "GRM_GuildMemberHistory_Save = {" ,
-        "GRM_CalendarAddQue_Save = {" ,
-        "GRM_LogReport_Save = {" ,       # Index 2 (Log Report)
-        "GRM_AddonSettings_Save = {" ,
-        "GRM_PlayerListOfAlts_Save = {" ,
-        "GRM_GuildDataBackup_Save = {" ,
-        "GRM_Misc = {" ,
-        "GRM_Alts = {" ,
+        "GRM_GuildMemberHistory_Save = {" , # Starting at 2nd save variable as first is auto in position
+        "GRM_CalendarAddQue_Save = {",
+        "GRM_LogReport_Save = {",
+        "GRM_AddonSettings_Save = {",
+        "GRM_PlayerListOfAlts_Save = {",
+        "GRM_GuildDataBackup_Save = {",
+        "GRM_Restore_Members = {",
+        "GRM_Restore_FormerMembers = {",
+        "GRM_Restore_Log = {",
+        "GRM_Misc = {",
+        "GRM_Alts = {",
         "GRM_DailyAnnounce = {"
     ]
     # We only need logReport (index 3) for the parser function later
-    SeparatedTables = [ leftPlayers , currentMembers , None , logReport , settings , None , backupData , None , alts ]
+    SeparatedTables = [ formerMembers , currentMembers , calendarDetails, logEntries ,
+                        addonSettings , playerListAlts , guildDataBackup ,
+                        restoreMembers , restoreFormerMembers , restoreLog ,
+                        miscSettings , altsList , dailyAnnouncements ]
 
     # 3. Separate Tables (Only up to GRM_Misc, index 6, is needed to capture LogReport)
     currentArray = []
-    currentSaveIndex = 0
+    saveTableIndex = 0
+    separatedTablesIndex = 0
 
-    for line in data:
+
+    for i, line in enumerate(data):
+
+        if saveTables[saveTableIndex] in line:
+            SeparatedTables[separatedTablesIndex] = copy.deepcopy(currentArray)
+            currentArray = []
+            separatedTablesIndex += 1
+            if saveTableIndex < len(saveTables) - 1:
+                saveTableIndex += 1
+
         currentArray.append ( line )
 
-        if currentSaveIndex < len(saveTables) and saveTables[currentSaveIndex] in line:
+        if i == len(data):
+            SeparatedTables[separatedTablesIndex] = copy.deepcopy(currentArray)
 
-            if currentSaveIndex == 2:
-                # Capture the lines that follow the LogReport start definition
-                SeparatedTables[3] = copy.deepcopy(currentArray)
-
-            currentArray = []
-            currentSaveIndex += 1
-
-        if currentSaveIndex >= 6:
-            # Stop parsing after GRM_GuildDataBackup_Save / before GRM_Misc
-            break
-
-    # 4. Execute the Log Parsing
-    if not SeparatedTables[3]:
-        # Handle case where Log Report table was empty or not found
-        return {}
-
+    # 4. Parse Log Report Table
     final_log_data = ParseLog(SeparatedTables[3])
 
     return final_log_data
@@ -75,6 +84,7 @@ def process_lua_content(lua_content: str) -> dict:
 # ======================================================================
 
 def remove_string_coloring(text: str) -> str:
+
     """
     Removes Blizzard-style hex coloring tags (|cffXXXXXX) and color reset tags (|r, |R)
     from a string, and truncates at the first null character (\000).
@@ -96,15 +106,17 @@ def ParseLog ( data ):
     LogData = {}
     namePattern = r'\[\"(.*)\"\]'
     bracketCount = 0
-    opening = "{\n"
-    closing = "},\n"
+    opening_pattern = r"(^\s*{\s*$|=\s*{\s*$)"
+    closing_pattern = r"^\s*},\s*$"
     entryIndex = 0
     cleanLine = ""
+    totalEntries = 0
 
-    for line in data:
+    for i,line in enumerate(data[1:], start=1): # Skipping the first line which is the table opening
 
-        # 1. Detect Guild Name (e.g., ["Guild Name"] = {)
+        # 1. Detect Guild Name (["Guild Name"] = {)
         if bracketCount == 0 and re.search ( namePattern , line ):
+        # if re.search ( namePattern , line ):
             name = re.search ( namePattern , line ).group(1)
             bracketCount += 1
             LogData[name] = []
@@ -112,6 +124,7 @@ def ParseLog ( data ):
         # 2. Detect Log Entry Value (3rd level bracket count)
         elif bracketCount == 3:
             entryIndex += 1
+
             if entryIndex == 2:
                 # This is the line containing the actual log string value
                 cleanLine = line.strip().rstrip(',')
@@ -124,12 +137,13 @@ def ParseLog ( data ):
                 cleanLine = remove_string_coloring(cleanLine)
 
                 LogData[name].append(cleanLine)
+                totalEntries += 1
 
         # 3. Bracket Counting for Structure
-        if re.search ( opening , line ):
+        if re.search ( opening_pattern , line ):
             bracketCount += 1
 
-        elif re.search ( closing , line ):
+        elif re.search ( closing_pattern , line ):
             bracketCount -= 1
 
             if bracketCount == 2:
@@ -137,8 +151,8 @@ def ParseLog ( data ):
                 entryIndex = 0
 
             elif bracketCount == 1:
-                # End of a Guild's log history table
                 bracketCount = 0
+                totalEntries = 0
 
     return LogData
 
