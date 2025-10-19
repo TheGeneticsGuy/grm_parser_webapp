@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRM Select Export Options</title>
+
+    <meta name="description"
+        content="GRM Select Export Options">
+    <meta name="author" content="Aaron Topping aka TheGeneticsGuy aka Arkaan">
+
+    <!-- STYLE SHEETS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/select_styles.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+</head>
+<body>
+    <h1>Logs Parsed Successfully!</h1>
+    <p>Please choose which guild log to export and in what format.</p>
+
+    <form action="{{ url_for('export_data') }}" method="POST">
+
+        <div class="selection-group">
+            <h2>1. Select Guild Log:</h2>
+            {% for guild, count in guilds.items() %}
+            <label>
+                <input type="radio" name="guild_name" value="{{ guild }}" id="{{ guild }}" required>
+                {{ guild }} ({{ count }} entries)
+            </label>
+            {% endfor %}
+
+            <hr>
+
+            <label>
+                <input type="radio" name="guild_name" value="ALL" id="ALL" required>
+                <b>Export All Logs</b>
+            </label>
+        </div>
+
+        <div class="selection-group">
+            <h2>2. Select Export Format:</h2>
+            <label>
+                <input type="radio" name="format" value="text" id="text" required checked>
+                Plain Text (.txt) — Simple, one entry per line.
+            </label>
+            <label>
+                <input type="radio" name="format" value="csv" id="csv" required>
+                CSV (.csv) — Structured data for Excel/Sheets.
+            </label>
+            <label>
+                <input type="radio" name="format" value="json" id="json" required>
+                JSON (.json) — Raw dictionary data structure.
+            </label>
+        </div>
+
+        <button class="selectButton" type="submit">Download Selected Log</button>
+    </form>
+</body>
+</html>

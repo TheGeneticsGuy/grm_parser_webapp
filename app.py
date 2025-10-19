@@ -10,21 +10,8 @@ load_dotenv()
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
 from parsing_logic import process_lua_content, format_to_text, format_to_csv
 
-# Get the absolute path to the directory
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
+app = Flask(__name__)
 
-# --- TEMPORARY DEBUG PRINT ---
-print(f"DEBUG: App file location: {__file__}")
-print(f"DEBUG: Calculated BASE_DIR: {BASE_DIR}")
-print(f"DEBUG: Calculated TEMPLATE_PATH: {TEMPLATE_PATH}")
-# --- END DEBUG PRINT ---
-
-# Initialize Flask app, explicitly telling it where to find templates
-app = Flask(__name__,
-            template_folder=TEMPLATE_PATH,
-            static_folder=os.path.join(BASE_DIR, 'static')
-            )
 # Set the secret key from the env
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 

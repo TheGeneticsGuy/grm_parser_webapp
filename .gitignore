@@ -6,7 +6,6 @@ venv/
 __pycache__/
 *.pyc
 *.log
-temp*/
 
 # VS Code specific
 .vscode/

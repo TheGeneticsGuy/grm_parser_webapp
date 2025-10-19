@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRM Log Extractor</title>
+
+    <meta name="description"
+        content="Extracts the Guild Roster Manager Log from the saved Variables file of the GRM warcraft addon">
+    <meta name="author" content="Aaron Topping aka TheGeneticsGuy aka Arkaan">
+
+    <!-- STYLE SHEETS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+    <!-- META properties Facebook -->
+    <meta property="og:title" content="GRM Log Extractor">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/TheGeneticsGuy/grm_parser_webapp">
+    <meta property="og:image" content="{{ url_for('static', filename='images/grm_logo.jpg') }}">
+    <meta property="og:description" content="Extract all your log entries from the GRM addon saved variables file.">
+
+    <!-- X Card tags -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="GRM Log Extractor">
+    <meta name="twitter:description" content="Extract all your log entries from the GRM addon saved variables file.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/grm_logo.jpg') }}">
+    <meta name="twitter:url" content="https://github.com/TheGeneticsGuy/grm_parser_webapp">
+
+
+</head>
+<body>
+    <h1>Guild Roster Manager Log Extractor</h1>
+    <p>Upload your WoW Addon Saved Variables file (<code>Guild_Roster_Manager.lua</code>) below.</p>
+
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" name="file" id="fileInput" accept=".lua" required>
+
+        <div class="drop-zone" onclick="document.getElementById('fileInput').click();">
+            <p>Drag & Drop your .lua file here</p>
+            <p>or Click to Browse</p>
+        </div>
+
+        <button type="submit">Process File</button>
+    </form>
+
+    <script>
+        const dropZone = document.querySelector('.drop-zone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('hover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('hover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('hover');
+
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                // submit the form automatically
+                document.getElementById('uploadForm').submit();
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            // Display filename or automatically submit
+            if (fileInput.files.length) {
+                 dropZone.innerHTML = `<p>File Ready: <b>${fileInput.files[0].name}</b></p><p>Click 'Process File' below.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
