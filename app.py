@@ -56,12 +56,14 @@ def select_export():
         return redirect(url_for('upload_file'))
 
     metadata = session['guild_metadata']
-    return render_template('select.html', guilds=metadata)
+    return render_template( '/templates/select.html', guilds=metadata )
+    # return render_template('select.html', guilds=metadata)
 
 @app.route('/export', methods=['POST'])
 def export_data():
+
     if 'grm_log_data' not in session:
-        return redirect(url_for('upload_file'))
+        return redirect(url_for('/templates/upload_file'))
 
     selected_guild = request.form.get('guild_name')
     export_format = request.form.get('format')
