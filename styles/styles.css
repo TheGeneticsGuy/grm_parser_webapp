@@ -1,0 +1,32 @@
+body {
+    font-family: sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.drop-zone {
+    border: 2px dashed #ccc;
+    padding: 50px;
+    margin: 20px auto;
+    width: 80%;
+    max-width:
+    500px;
+    cursor: pointer;
+}
+
+.drop-zone.hover {
+    border-color: #333;
+    background-color: #f0f0f0;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
