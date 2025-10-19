@@ -48,7 +48,7 @@ def upload_file():
 
         return redirect(url_for('select_export'))
 
-    return render_template('upload.html')
+    return render_template('/templates/upload.html')
 
 @app.route('/select', methods=['GET'])
 def select_export():
@@ -63,7 +63,7 @@ def select_export():
 def export_data():
 
     if 'grm_log_data' not in session:
-        return redirect(url_for('/templates/upload_file'))
+        return redirect(url_for('upload_file'))
 
     selected_guild = request.form.get('guild_name')
     export_format = request.form.get('format')
