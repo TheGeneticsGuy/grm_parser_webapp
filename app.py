@@ -48,7 +48,7 @@ def upload_file():
 
         return redirect(url_for('select_export'))
 
-    return render_template('upload.html')
+    return render_template('templates/upload.html')
 
 @app.route('/select', methods=['GET'])
 def select_export():
@@ -56,7 +56,7 @@ def select_export():
         return redirect(url_for('upload_file'))
 
     metadata = session['guild_metadata']
-    return render_template('select.html', guilds=metadata)
+    return render_template('templates/select.html', guilds=metadata)
 
 @app.route('/export', methods=['POST'])
 def export_data():
