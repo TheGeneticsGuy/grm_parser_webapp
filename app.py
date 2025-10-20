@@ -1,20 +1,24 @@
 import os
 import json
-import tempfile
 from io import StringIO
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-from flask import Flask, request, render_template, redirect, url_for, session, send_file
+from flask import Flask, request, render_template, redirect, url_for, session
+from flask_session import Session
 from parsing_logic import process_lua_content, format_to_text, format_to_csv
+
 
 app = Flask(__name__)
 
-# Set the secret key from the env
-app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
+# --- CONFIGURATION FOR SERVER-SIDE SESSIONS ---
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -26,9 +30,8 @@ def upload_file():
         if file.filename == '' or not file.filename.endswith('.lua'):
             return "Invalid file type. Please upload a .lua file.", 400
 
-        # Read the file content safely
+        # Read file content
         try:
-            # We read as bytes, then decode as UTF-8, ignoring errors
             lua_content = file.read().decode('utf-8', errors='ignore')
         except Exception as e:
              return f"Error reading file content: {e}", 500
@@ -37,12 +40,10 @@ def upload_file():
         try:
             log_data = process_lua_content(lua_content)
         except Exception as e:
-            # Handle parsing errors gracefully
             print(f"Parsing error: {e}")
             return f"Error processing file. Please ensure it is the correct GRM Save Variables file. Debug: {e}", 500
 
-        print(f"Processed guilds: {list(log_data.keys())} with entries: {[len(logs) for logs in log_data.values()]}")
-        # Store the processed data in the session
+        # Store the processed data in the session (this now saves to a server file)
         session['grm_log_data'] = log_data
         session['guild_metadata'] = {
             name: len(logs) for name, logs in log_data.items()
