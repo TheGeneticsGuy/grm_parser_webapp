@@ -172,33 +172,18 @@ def format_to_text(log_data: dict) -> str:
     return "\n".join(output)
 
 def format_to_csv(log_data: dict) -> str:
-    """Formats the log data dictionary into a CSV string."""
-    # Use StringIO to simulate a file for the CSV writer
+    """Formats the log data dictionary into a two-column CSV string: Guild Name and Log Entry."""
     output = StringIO()
     # Ensure UTF-8 BOM for proper Excel handling of special characters
     output.write('\ufeff')
     writer = csv.writer(output)
 
-    writer.writerow(["Guild Name", "Date/Time", "Log Entry"])
+    # Column names
+    writer.writerow(["Guild Name", "Log Entry"])
 
-    # Pattern to grab the date/time stamp
-    # Format example: "28 Nov '23 01:19pm : Arkaan has Come ONLINE..."
-    date_pattern = r'^(\d{1,2} \w{3} \'\d{2} \d{1,2}:\d{2}(?:am|pm)\s*:\s*)(.*)$'
-
+    # Loop through the data and write the full log entry in the second column
     for guild_name, entries in log_data.items():
         for entry in entries:
-            match = re.match(date_pattern, entry)
-
-            if match:
-                # Group 1 is the timestamp (with trailing colon)
-                timestamp = match.group(1).strip().rstrip(':').strip()
-                # Group 2 is the rest of the message
-                message = match.group(2).strip()
-            else:
-                # If the log entry format doesn't match the expected timestamp pattern
-                timestamp = "N/A"
-                message = entry
-
-            writer.writerow([guild_name, timestamp, message])
+            writer.writerow([guild_name, entry])
 
     return output.getvalue()

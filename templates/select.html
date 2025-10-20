@@ -1,61 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRM Select Export Options</title>
+{% extends "base.html" %}
 
-    <meta name="description"
-        content="GRM Select Export Options">
-    <meta name="author" content="Aaron Topping aka TheGeneticsGuy aka Arkaan">
+{% block title %}Select Export Options{% endblock %}
 
-    <!-- STYLE SHEETS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/select_styles.css') }}">
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body p-5">
+        <h1 class="card-title">Logs Parsed Successfully!</h1>
+        <p class="lead text-muted">Choose a guild and format, then click download. You can download multiple formats without re-uploading.</p>
 
-    <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+        <form action="{{ url_for('export_data') }}" method="POST">
+            <div class="row">
+                <!-- Guild Selection -->
+                <div class="col-md-6 mb-4">
+                    <div class="selection-group p-3 border rounded h-100">
+                        <h2>1. Select Guild Log:</h2>
+                        {% for guild, count in guilds.items() %}
+                        <!-- The .form-check class is targeted by my CSS for hover effects -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="guild_name" value="{{ guild }}" id="guild_{{ loop.index }}"
+                                   {% if loop.first %}checked{% endif %} required>
+                            <label class="form-check-label" for="guild_{{ loop.index }}">
+                                <!-- Bolding the guild name and styling the count -->
+                                <strong>{{ guild }}</strong>
+                                <small class="text-muted d-block">- {{ count }} entries</small>
+                            </label>
+                        </div>
+                        {% endfor %}
+                        <hr>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="guild_name" value="ALL" id="all_guilds" required>
+                            <label class="form-check-label" for="all_guilds">
+                                <strong>Export All Logs</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
-</head>
-<body>
-    <h1>Logs Parsed Successfully!</h1>
-    <p>Please choose which guild log to export and in what format.</p>
+                <!-- Format Selection -->
+                <div class="col-md-6 mb-4">
+                    <div class="selection-group p-3 border rounded h-100">
+                        <h2>2. Select Export Format:</h2>
+                        <!-- Each option is wrapped in a .form-check for consistent styling and hover effects -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" value="text" id="format_text" required checked>
+                            <label class="form-check-label" for="format_text">Plain Text (.txt)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" value="csv" id="format_csv" required>
+                            <label class="form-check-label" for="format_csv">CSV for Excel/Sheets (.csv)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" value="json" id="format_json" required>
+                            <label class="form-check-label" for="format_json">JSON Raw Data (.json)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <form action="{{ url_for('export_data') }}" method="POST">
+            <div class="text-center mt-4">
+                <button class="btn btn-success btn-lg" type="submit">Download Selected Log</button>
+            </div>
+        </form>
 
-        <div class="selection-group">
-            <h2>1. Select Guild Log:</h2>
-            {% for guild, count in guilds.items() %}
-            <label>
-                <input type="radio" name="guild_name" value="{{ guild }}" id="{{ guild }}" required>
-                {{ guild }} ({{ count }} entries)
-            </label>
-            {% endfor %}
-
-            <hr>
-
-            <label>
-                <input type="radio" name="guild_name" value="ALL" id="ALL" required>
-                <b>Export All Logs</b>
-            </label>
+        <div class="text-center mt-3">
+             <a href="{{ url_for('upload_file') }}" class="btn btn-outline-secondary">Upload Another File</a>
         </div>
-
-        <div class="selection-group">
-            <h2>2. Select Export Format:</h2>
-            <label>
-                <input type="radio" name="format" value="text" id="text" required checked>
-                Plain Text (.txt) — Simple, one entry per line.
-            </label>
-            <label>
-                <input type="radio" name="format" value="csv" id="csv" required>
-                CSV (.csv) — Structured data for Excel/Sheets.
-            </label>
-            <label>
-                <input type="radio" name="format" value="json" id="json" required>
-                JSON (.json) — Raw dictionary data structure.
-            </label>
-        </div>
-
-        <button class="selectButton" type="submit">Download Selected Log</button>
-    </form>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

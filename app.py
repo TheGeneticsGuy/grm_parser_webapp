@@ -8,8 +8,6 @@ load_dotenv()
 
 from flask import Flask, request, render_template, redirect, url_for, session
 from flask_session import Session
-from parsing_logic import process_lua_content, format_to_text, format_to_csv
-
 
 app = Flask(__name__)
 
@@ -20,110 +18,101 @@ Session(app)
 
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
+from parsing_logic import process_lua_content, format_to_text, format_to_csv
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    # If it's a GET request, clearing any previous session data for a fresh start
+    if request.method == 'GET':
+        session.pop('grm_log_data', None)
+        session.pop('guild_metadata', None)
+
     if request.method == 'POST':
-        if 'file' not in request.files:
-            return "No file part", 400
+        if 'file' not in request.files or not request.files['file'].filename:
+            return render_template('error.html', message='No file was selected. Please try again.')
 
         file = request.files['file']
         if file.filename != 'Guild_Roster_Manager.lua' or not file.filename.endswith('.lua'):
-            return "Invalid file type. Please upload the correct Guild_Roster_Manager.lua file.", 400
+            return render_template('error.html', message='Invalid file. Only Guild_Roster_Manager.lua save file is accepted.')
 
-        # Read file content
         try:
             lua_content = file.read().decode('utf-8', errors='ignore')
-        except Exception as e:
-             return f"Error reading file content: {e}", 500
-
-        # Run processing logic
-        try:
             log_data = process_lua_content(lua_content)
+
+            # Check if parsing produced any data
+            if not log_data:
+                return render_template('error.html', message='Could not find any valid GRM log data in the file.')
+
         except Exception as e:
             print(f"Parsing error: {e}")
-            return f"Error processing file. Please ensure it is the correct GRM Save Variables file. Debug: {e}", 500
+            return render_template('error.html', message='There was an error processing your file. Please ensure it is an unmodified GRM save file.')
 
-        # Store the processed data in the session (this now saves to a server file)
         session['grm_log_data'] = log_data
         session['guild_metadata'] = {
             name: len(logs) for name, logs in log_data.items()
         }
-
         return redirect(url_for('select_export'))
 
     return render_template('upload.html')
 
-@app.route('/select', methods=['GET'])
+@app.route('/select')
 def select_export():
     if 'guild_metadata' not in session:
         return redirect(url_for('upload_file'))
 
-    metadata = session['guild_metadata']
+    metadata = session.get('guild_metadata', {})
     return render_template('select.html', guilds=metadata)
 
 @app.route('/export', methods=['POST'])
 def export_data():
     if 'grm_log_data' not in session:
-        return redirect(url_for('upload_file'))
+        return render_template('error.html', message='Your session has expired. Please upload your file again.')
 
+    # ... The rest of your export_data function ...
+    # CRITICAL CHANGE: We will NO LONGER clear the session here.
+    # The session will persist until the user returns to the homepage.
+
+    # ... (all your existing logic for generating the file) ...
+
+    # Example snippet, ensure your full logic is here
     selected_guild = request.form.get('guild_name')
     export_format = request.form.get('format')
-
     full_data = session['grm_log_data']
 
-    # 1. Determine data subset and filename
+    # Your logic for data_to_export and filename
     if selected_guild == 'ALL':
         data_to_export = full_data
         filename = "grm_logs_ALL"
-    elif selected_guild in full_data:
-        data_to_export = {selected_guild: full_data[selected_guild]}
-        # Clean the guild name for a safe filename
-        safe_guild_name = selected_guild.replace(' ', '_').replace('[', '').replace(']', '').replace('-', '_')
-        filename = f"grm_logs_{safe_guild_name}"
     else:
-        return "Invalid guild selected.", 400
+        data_to_export = {selected_guild: full_data.get(selected_guild, [])}
+        filename = f"grm_logs_{selected_guild.replace(' ', '_')}"
 
-    # 2. Generate content based on format
-    content_type = ""
-    file_extension = ""
+    # Your logic for output_content and content_type
     output_content = ""
-
-    if export_format == 'json':
-        output_content = json.dumps(data_to_export, indent=4, ensure_ascii=False)
-        content_type = 'application/json'
-        file_extension = '.json'
-
+    if export_format == 'csv':
+        output_content = format_to_csv(data_to_export)
+        content_type = 'text/csv'
+        file_extension = '.csv'
     elif export_format == 'text':
         output_content = format_to_text(data_to_export)
         content_type = 'text/plain'
         file_extension = '.txt'
+    else: # json
+        output_content = json.dumps(data_to_export, indent=4, ensure_ascii=False)
+        content_type = 'application/json'
+        file_extension = '.json'
 
-    elif export_format == 'csv':
-        output_content = format_to_csv(data_to_export)
-        content_type = 'text/csv'
-        file_extension = '.csv'
-
-    else:
-        return "Invalid export format.", 400
-
-    # 3. Using StringIO to serve the content directly without saving a temporary file to disk
-    # This is safer and cleaner for ephemeral web apps like this.
     str_io = StringIO()
     str_io.write(output_content)
     str_io.seek(0)
 
-    # Flask response to force download
     from flask import make_response
     response = make_response(str_io.read())
     response.headers["Content-Disposition"] = f"attachment; filename={filename}{file_extension}"
     response.headers["Content-type"] = content_type
 
-    # Clearing the session data immediately after starting the download
-    session.pop('grm_log_data', None)
-    session.pop('guild_metadata', None)
-
+    # REMOVED session.pop() lines
     return response
 
 if __name__ == '__main__':
-    # Flask default is 5000
     app.run(debug=True)
