@@ -27,8 +27,8 @@ def upload_file():
             return "No file part", 400
 
         file = request.files['file']
-        if file.filename == '' or not file.filename.endswith('.lua'):
-            return "Invalid file type. Please upload a .lua file.", 400
+        if file.filename != 'Guild_Roster_Manager.lua' or not file.filename.endswith('.lua'):
+            return "Invalid file type. Please upload the correct Guild_Roster_Manager.lua file.", 400
 
         # Read file content
         try:
