@@ -1,12 +1,13 @@
 import os
 import json
-from io import StringIO
+from io import StringIO, BytesIO
+from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, send_file
 from flask_session import Session
 
 app = Flask(__name__)
@@ -68,51 +69,47 @@ def export_data():
     if 'grm_log_data' not in session:
         return render_template('error.html', message='Your session has expired. Please upload your file again.')
 
-    # ... The rest of your export_data function ...
-    # CRITICAL CHANGE: We will NO LONGER clear the session here.
-    # The session will persist until the user returns to the homepage.
-
-    # ... (all your existing logic for generating the file) ...
-
-    # Example snippet, ensure your full logic is here
     selected_guild = request.form.get('guild_name')
     export_format = request.form.get('format')
     full_data = session['grm_log_data']
 
-    # Your logic for data_to_export and filename
+    # Get today's date and format it
+    datestamp = datetime.now().strftime("%Y-%m-%d")
+
+    # Determine the base part of the filename
     if selected_guild == 'ALL':
         data_to_export = full_data
-        filename = "grm_logs_ALL"
+        base_filename = "grm_logs_ALL"
     else:
         data_to_export = {selected_guild: full_data.get(selected_guild, [])}
-        filename = f"grm_logs_{selected_guild.replace(' ', '_')}"
+        safe_guild_name = selected_guild.replace(' ', '_').replace('[', '').replace(']', '').replace('-', '_')
+        base_filename = f"grm_logs_{safe_guild_name}"
 
-    # Your logic for output_content and content_type
-    output_content = ""
-    if export_format == 'csv':
-        output_content = format_to_csv(data_to_export)
-        content_type = 'text/csv'
-        file_extension = '.csv'
-    elif export_format == 'text':
-        output_content = format_to_text(data_to_export)
-        content_type = 'text/plain'
-        file_extension = '.txt'
-    else: # json
-        output_content = json.dumps(data_to_export, indent=4, ensure_ascii=False)
-        content_type = 'application/json'
-        file_extension = '.json'
+    # Combine the datestamp and the base filename
+    filename = f"{datestamp}_{base_filename}"
 
-    str_io = StringIO()
-    str_io.write(output_content)
-    str_io.seek(0)
+    if export_format == 'text':
+        # Generate the string, then encode it to bytes
+        output_bytes = format_to_text(data_to_export).encode('utf-8')
+        # Create a binary buffer
+        buffer = BytesIO(output_bytes)
+        return send_file(buffer, mimetype='text/plain', as_attachment=True, download_name=f"{filename}.txt")
 
-    from flask import make_response
-    response = make_response(str_io.read())
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}{file_extension}"
-    response.headers["Content-type"] = content_type
+    elif export_format == 'csv':
+        # Generate the string, then encode it to bytes
+        output_bytes = format_to_csv(data_to_export).encode('utf-8')
+        # Create a binary buffer
+        buffer = BytesIO(output_bytes)
+        return send_file(buffer, mimetype='text/csv', as_attachment=True, download_name=f"{filename}.csv")
 
-    # REMOVED session.pop() lines
-    return response
+    elif export_format == 'json':
+        # Generate the string, then encode it to bytes
+        output_bytes = json.dumps(data_to_export, indent=4, ensure_ascii=False).encode('utf-8')
+        # Create a binary buffer
+        buffer = BytesIO(output_bytes)
+        return send_file(buffer, mimetype='application/json', as_attachment=True, download_name=f"{filename}.json")
+
+    return render_template('error.html', message='Invalid export format selected.')
 
 if __name__ == '__main__':
     app.run(debug=True)

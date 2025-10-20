@@ -16,6 +16,29 @@
     </div>
 </div>
 
+<div class="text-center mt-2">
+    <small class="text-muted">
+        Note: Due to free hosting limits, files larger than ~20MB may time out.
+    </small>
+</div>
+
+<div class="text-center mt-4">
+    <!-- link that will toggle the help section -->
+    <a data-bs-toggle="collapse" href="#fileHelp" role="button" aria-expanded="false" aria-controls="fileHelp">
+        Where do I find my SavedVariables file?
+    </a>
+</div>
+
+<div class="collapse mt-3" id="fileHelp">
+    <div class="card card-body bg-light text-start">
+        <p class="mb-2">You can find your addon save file in your World of Warcraft installation folder. For example, for Retail WoW it will be found:</p>
+        <code>\World of Warcraft\_retail_\WTF\Account\YOUR_ACCOUNT_INFO\SavedVariables\</code>
+        <p class="mt-2 mb-0 small text-muted">
+            Note: <code>YOUR_ACCOUNT_INFO</code> will be a unique name or number specific to your Battle.net account (e.g., 1234567#1 or YOURACCOUNTNAME).
+        </p>
+    </div>
+</div>
+
 <div id="processingIndicator" style="display: none;" class="text-center mt-4">
     <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
