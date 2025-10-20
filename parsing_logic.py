@@ -77,7 +77,16 @@ def process_lua_content(lua_content: str) -> dict:
     # 4. Parse Log Report Table
     final_log_data = ParseLog(SeparatedTables[3])
 
-    return final_log_data
+    # Let's sort the data now by number of entries per guild, descending.
+    sorted_items = sorted(
+        final_log_data.items(),
+        key=lambda item: len(item[1]),
+        reverse=True
+    )
+    # Rebuild the dictionary from the sorted list of items.
+    sorted_log_data = {guild: logs for guild, logs in sorted_items}
+
+    return sorted_log_data
 
 # ======================================================================
 # LOG PARSING FUNCTIONS (Modified to remove prints)
