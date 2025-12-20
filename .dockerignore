@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+
+# VS Code and Git specific
+.vscode/
+.git/
+.gitignore
+
+# Test files not needed in production
+Test Files/
