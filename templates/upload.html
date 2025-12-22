@@ -142,7 +142,11 @@
                 }
             } else {
                 // Keep your error logic
-                alert(`Upload Failed!\nError Code: ${xhr.status} (${xhr.statusText})\n\nIf your file is over 100MB, please compress it into a .zip file and try again.`);
+                if (xhr.status === 413) {
+                    alert(`Upload Failed!\nError Code: ${xhr.status}\n\nIf your file is over 100MB, please compress it into a .zip file and try again.`);
+                } else {
+                    alert(`Upload Failed!\nError Code: ${xhr.status} (${xhr.statusText})\n\If your file is over 100MB, please compress it into a .zip file and try again. Otherwise, please try again soon. If problem persists, please report the error code to the author.` );
+                }
                 location.reload();
             }
         };
