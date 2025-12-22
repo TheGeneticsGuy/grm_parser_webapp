@@ -6,6 +6,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-Flask-yellow.svg)](https://www.python.org/)
 
+[Click Here to View the Live Site](https://extract.guildrostermanager.com/)
+
 ## 📖 About
 
 The **GRM Log Extractor** solves a common problem for guild officers and leaders, log bloat, and accessing your log outside of the game.
