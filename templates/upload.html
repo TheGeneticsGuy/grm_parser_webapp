@@ -37,10 +37,10 @@
 
 </div>
 
-<!-- Info Sections -->
+<!-- Info Stuff -->
 <div class="text-center mt-2">
     <small class="text-muted fw-light">
-        Note: Max File Size ~250MB.
+        Note: Files 100MB or larger <strong>MUST</strong> be compressed into a <code>.zip</code> file.
     </small>
 </div>
 
@@ -61,7 +61,7 @@
 
 <!-- Hidden Form -->
 <form method="POST" enctype="multipart/form-data" id="uploadForm">
-    <input type="file" name="file" id="fileInput" accept=".lua" required hidden>
+    <input type="file" name="file" id="fileInput" accept=".lua, .zip" required hidden>
 </form>
 
 <script>
@@ -89,49 +89,60 @@
     function handleFileUpload(file) {
         if (!file) return;
 
-        // Hide Input Card, Show Status Section
+        // Checking for correct file type
+        const fileName = file.name.toLowerCase();
+        if (!fileName.endsWith('.lua') && !fileName.endsWith('.zip')) {
+            alert("Invalid file type. Please upload a .lua or .zip file.");
+            return;
+        }
+
+        // Hide Input Card, Show Status
         document.querySelector('.card').style.display = 'none';
         statusSection.style.display = 'block';
 
-        // Prepare AJAX Request
         const formData = new FormData();
         formData.append('file', file);
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/', true);
 
-        // Track Upload Progress
+        // Alright, let's track upload progress
         xhr.upload.onprogress = function(e) {
             if (e.lengthComputable) {
                 const percentComplete = Math.round((e.loaded / e.total) * 100);
                 progressBar.style.width = percentComplete + '%';
                 percentText.innerText = percentComplete + '%';
 
-                // Switch to Processing State immediately when upload hits 100%
                 if (percentComplete >= 100) {
+                    // Updating the UI to show extraction/processing is happening
                     setTimeout(() => {
                         uploadContainer.style.display = 'none';
                         processingContainer.style.display = 'block';
-                    }, 500); // Small delay for aesthetics - I just like it more
+                        // Dynamically update text based on file type
+                        const statusTitle = document.querySelector('#processingContainer h4');
+                        if (fileName.endsWith('.zip')) {
+                            statusTitle.innerText = "Extracting & Processing...";
+                        } else {
+                            statusTitle.innerText = "Processing Data...";
+                        }
+                    }, 500);
                 }
             }
         };
 
-        // Handle Completion
+        // Handle Completion (same as before)
         xhr.onload = function() {
             if (xhr.status === 200) {
-                // If successful, the server redirects.
-                // Check if the response URL is actually the select page (meaning success)
                 if (xhr.responseURL.includes('/select')) {
                     window.location.href = xhr.responseURL;
                 } else {
-                    // If user gets the upload page back (error), rewrite the document
                     document.open();
                     document.write(xhr.responseText);
                     document.close();
                 }
             } else {
-                alert('An error occurred during upload.');
+                // Keep your error logic
+                alert(`Upload Failed!\nError Code: ${xhr.status} (${xhr.statusText})\n\nIf your file is over 100MB, please compress it into a .zip file and try again.`);
                 location.reload();
             }
         };
@@ -140,7 +151,6 @@
     }
 
     // --- Event Listeners ---
-
     uploadCardBody.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', () => {

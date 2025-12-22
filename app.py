@@ -1,5 +1,6 @@
 import os
 import json
+import zipfile
 from io import StringIO, BytesIO
 from datetime import datetime
 from dotenv import load_dotenv
@@ -9,6 +10,7 @@ load_dotenv()
 
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
 from flask_session import Session
+from parsing_logic import process_lua_content, format_to_text, format_to_csv
 
 app = Flask(__name__)
 
@@ -19,11 +21,8 @@ Session(app)
 
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
-from parsing_logic import process_lua_content, format_to_text, format_to_csv
-
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    # If it's a GET request, clearing any previous session data for a fresh start
     if request.method == 'GET':
         session.pop('grm_log_data', None)
         session.pop('guild_metadata', None)
@@ -33,20 +32,49 @@ def upload_file():
             return render_template('error.html', message='No file was selected. Please try again.')
 
         file = request.files['file']
-        if file.filename != 'Guild_Roster_Manager.lua' or not file.filename.endswith('.lua'):
-            return render_template('error.html', message='Invalid file. Only Guild_Roster_Manager.lua save file is accepted.')
+        filename = file.filename.lower()
+
+        # Checking for my 2 allowed extensions...
+        if not (filename.endswith('.lua') or filename.endswith('.zip')):
+            return render_template('error.html', message='Invalid file type. Only .lua and .zip files are accepted.')
 
         try:
-            lua_content = file.read().decode('utf-8', errors='ignore')
+            lua_content = ""
+
+            # ZIP FILE LOGIC
+            if filename.endswith('.zip'):
+                try:
+                    # Open the zip file directly from the upload stream
+                    with zipfile.ZipFile(file) as z:
+                        # Find the correct file inside the zip
+                        target_file = None
+                        for name in z.namelist():
+                            # Look for the specific filename, ignore paths/folders
+                            if 'guild_roster_manager.lua' in name.lower():
+                                target_file = name
+                                break
+
+                        if not target_file:
+                            return render_template('error.html', message='The .zip file does not contain "Guild_Roster_Manager.lua".')
+
+                        # Read and decode the specific file
+                        lua_content = z.read(target_file).decode('utf-8', errors='ignore')
+                except zipfile.BadZipFile:
+                    return render_template('error.html', message='The uploaded file is not a valid zip file.')
+
+            # Normal LUA Logic
+            else:
+                lua_content = file.read().decode('utf-8', errors='ignore')
+
+            # Process content of the file
             log_data = process_lua_content(lua_content)
 
-            # Check if parsing produced any data
             if not log_data:
                 return render_template('error.html', message='Could not find any valid GRM log data in the file.')
 
         except Exception as e:
             print(f"Parsing error: {e}")
-            return render_template('error.html', message='There was an error processing your file. Please ensure it is an unmodified GRM save file.')
+            return render_template('error.html', message=f'Error processing file: {str(e)}')
 
         session['grm_log_data'] = log_data
         session['guild_metadata'] = {
