@@ -22,7 +22,7 @@
     <!-- META properties Facebook -->
     <meta property="og:title" content="GRM Log Extractor">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://grm-parser-webapp.onrender.com/">
+    <meta property="og:url" content="https://extract.guildrostermanager.com/">
     <meta property="og:image" content="{{ url_for('static', filename='images/grm_logo.jpg') }}">
     <meta property="og:description" content="Extract all your log entries from the GRM addon saved variables file and export to text, CSV, or a JSON.">
 
@@ -31,13 +31,12 @@
     <meta name="twitter:title" content="GRM Log Extractor">
     <meta name="twitter:description" content="Extract all your log entries from the GRM addon saved variables file and export to text, CSV, or a JSON.">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/grm_logo.jpg') }}">
-    <meta name="twitter:url" content="https://grm-parser-webapp.onrender.com/">
+    <meta name="twitter:url" content="https://extract.guildrostermanager.com/">
 
 </head>
 <body class="bg-light">
 
     <div class="container mt-5">
-        <!-- Main content block for child templates -->
         {% block content %}{% endblock %}
     </div>
 
@@ -47,7 +46,7 @@
         <p><a href="https://www.curseforge.com/wow/addons/guild-roster-manager" target="_blank">GRM Addon Page</a></p>
     </footer>
 
-    <!-- Bootstrap JS (Optional, but good to have) -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

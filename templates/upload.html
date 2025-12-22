@@ -6,9 +6,8 @@
 <div class="card shadow-sm">
     <div class="card-body p-5 text-center" id="uploadCardBody">
         <img src="{{ url_for('static', filename='images/GRM_Extractor.jpg') }}" alt="GRM Extractor Banner" class="img-fluid w-100 d-block mx-auto mb-4" style="max-width: 350px;">
-        <!-- <h1 class="card-title">Guild Roster Manager - Log Extractor</h1> -->
-        <p class="lead text-muted">Upload your WoW Addon Saved Variables file to begin.<br>(<code>Guild_Roster_Manager.lua</code>)</p>
-
+        <h1 class="card-title">Guild Roster Manager Log Extractor</h1>
+        <p class="lead text-muted">Upload your WoW Addon Saved Variables file (<code>Guild_Roster_Manager.lua</code>) to begin.</p>
         <div class="mt-4">
             <p>Drag & Drop your .lua file anywhere in this box</p>
             <p class="text-muted">or Click to Browse</p>
@@ -16,91 +15,149 @@
     </div>
 </div>
 
-<!-- <div class="text-center mt-2">
-    <small class="text-muted">
-        Note: Due to free hosting limits, files larger than ~20MB may time out.
+<!-- === STATUS SECTION === -->
+<div id="statusSection" style="display: none;" class="mt-4">
+
+    <!-- Upload Progress Bar -->
+    <div id="uploadContainer">
+        <p class="text-center mb-2">Uploading File: <span id="percentText">0%</span></p>
+        <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="height: 25px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Processing Spinner (Hidden until upload hits 100%) -->
+    <div id="processingContainer" style="display: none;" class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Processing...</span>
+        </div>
+        <h4 class="mt-3">Processing Data...</h4>
+        <p class="text-muted">This may take a minute for large files.</p>
+    </div>
+
+</div>
+
+<!-- Info Sections -->
+<div class="text-center mt-2">
+    <small class="text-muted fw-light">
+        Note: Max File Size ~250MB.
     </small>
-</div> -->
+</div>
 
 <div class="text-center mt-4">
-    <!-- link that will toggle the help section -->
     <a data-bs-toggle="collapse" href="#fileHelp" role="button" aria-expanded="false" aria-controls="fileHelp">
         Where do I find my SavedVariables file?
     </a>
 </div>
-
 <div class="collapse mt-3" id="fileHelp">
     <div class="card card-body bg-light text-start">
-        <p class="mb-2">You can find your addon save file in your World of Warcraft installation folder. For example, for Retail WoW it will be found:</p>
+        <p class="mb-2">You can find your addon save file in your World of Warcraft installation folder. The path for Retail WoW is typically:</p>
         <code>\World of Warcraft\_retail_\WTF\Account\YOUR_ACCOUNT_INFO\SavedVariables\</code>
         <p class="mt-2 mb-0 small text-muted">
-            Note: <code>YOUR_ACCOUNT_INFO</code> will be a unique name or number specific to your Battle.net account (e.g., 1234567#1 or YOURACCOUNTNAME).
+            Note: <code>YOUR_ACCOUNT_INFO</code> will be a unique name or number specific to your Battle.net account.
         </p>
     </div>
 </div>
 
-<div id="processingIndicator" style="display: none;" class="text-center mt-4">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-    <p class="mt-2">Processing your file, please wait...</p>
-</div>
-
+<!-- Hidden Form -->
 <form method="POST" enctype="multipart/form-data" id="uploadForm">
     <input type="file" name="file" id="fileInput" accept=".lua" required hidden>
 </form>
 
 <script>
-    const form = document.getElementById('uploadForm');
     const fileInput = document.getElementById('fileInput');
     const uploadCardBody = document.getElementById('uploadCardBody');
-    const processingIndicator = document.getElementById('processingIndicator');
 
+    // Status Elements
+    const statusSection = document.getElementById('statusSection');
+    const uploadContainer = document.getElementById('uploadContainer');
+    const processingContainer = document.getElementById('processingContainer');
+    const progressBar = document.getElementById('progressBar');
+    const percentText = document.getElementById('percentText');
+
+    // --- Reset on Page Load (Fixes Back Button) ---
     window.addEventListener('pageshow', function(event) {
-        // Reset the UI to its initial state
         document.querySelector('.card').style.display = 'block';
-        processingIndicator.style.display = 'none';
-        // Clear the file input in case a file was selected before navigating away
+        statusSection.style.display = 'none';
+        uploadContainer.style.display = 'block';
+        processingContainer.style.display = 'none';
+        progressBar.style.width = '0%';
         fileInput.value = '';
     });
 
-    // Function to submit form and show indicator
-    function handleFileUpload() {
-        if (fileInput.files.length > 0) {
-            document.querySelector('.card').style.display = 'none'; // Hide the card
-            processingIndicator.style.display = 'block'; // Show spinner
-            form.submit();
-        }
+    // --- Main Upload Logic ---
+    function handleFileUpload(file) {
+        if (!file) return;
+
+        // Hide Input Card, Show Status Section
+        document.querySelector('.card').style.display = 'none';
+        statusSection.style.display = 'block';
+
+        // Prepare AJAX Request
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/', true);
+
+        // Track Upload Progress
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percentComplete + '%';
+                percentText.innerText = percentComplete + '%';
+
+                // Switch to Processing State immediately when upload hits 100%
+                if (percentComplete >= 100) {
+                    setTimeout(() => {
+                        uploadContainer.style.display = 'none';
+                        processingContainer.style.display = 'block';
+                    }, 500); // Small delay for aesthetics - I just like it more
+                }
+            }
+        };
+
+        // Handle Completion
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // If successful, the server redirects.
+                // Check if the response URL is actually the select page (meaning success)
+                if (xhr.responseURL.includes('/select')) {
+                    window.location.href = xhr.responseURL;
+                } else {
+                    // If user gets the upload page back (error), rewrite the document
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                }
+            } else {
+                alert('An error occurred during upload.');
+                location.reload();
+            }
+        };
+
+        xhr.send(formData);
     }
 
-    // Clicking anywhere on the card body triggers the hidden file input
-    uploadCardBody.addEventListener('click', () => {
-        fileInput.click();
+    // --- Event Listeners ---
+
+    uploadCardBody.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) handleFileUpload(fileInput.files[0]);
     });
 
-    // Auto-submit when a file is chosen via the browser dialog
-    fileInput.addEventListener('change', handleFileUpload);
-
-    // --- Drag and Drop Logic (now on the card body) ---
     uploadCardBody.addEventListener('dragover', (e) => {
         e.preventDefault();
-        // Add visual cue only if a file is being dragged over
-        if (e.dataTransfer.types.includes('Files')) {
-            uploadCardBody.classList.add('drag-over');
-        }
+        if (e.dataTransfer.types.includes('Files')) uploadCardBody.classList.add('drag-over');
     });
 
-    uploadCardBody.addEventListener('dragleave', () => {
-        uploadCardBody.classList.remove('drag-over');
-    });
+    uploadCardBody.addEventListener('dragleave', () => uploadCardBody.classList.remove('drag-over'));
 
     uploadCardBody.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadCardBody.classList.remove('drag-over');
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            handleFileUpload(); // Auto-submit on drop
-        }
+        if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
     });
 </script>
 {% endblock %}
