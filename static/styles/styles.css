@@ -1,4 +1,4 @@
-/* Make the entire card body clickable */
+/* Making the entire card body clickable */
 #uploadCardBody {
     cursor: pointer;
     transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
@@ -8,7 +8,7 @@
 /* For when file is being dragged over the card */
 #uploadCardBody.drag-over {
     background-color: #e9f5ff;
-    border-color: #0d6efd; /* Bootstrap's primary blue */
+    border-color: #0d6efd;
     border-style: solid;
 }
 
@@ -19,7 +19,6 @@
     margin-bottom: 0.5rem;
 }
 
-/* Hover animation for the selectable options */
 .form-check:hover {
     background-color: #f8f9fa;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
@@ -27,9 +26,256 @@
 }
 
 code {
-    background-color: #e9ecef; /* A light grey background */
+    background-color: #e9ecef;
     padding: 0.2em 0.4em;
     border-radius: 3px;
-    font-size: 90%; /* Make it slightly smaller than regular text */
-    color: #c7254e; /* A reddish color for emphasis */
+    font-size: 90%;
+    color: #c7254e;
+}
+
+.grm-nav, .grm-footer, .grm-body {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.grm-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) { .grm-container { padding-left: 1.5rem; padding-right: 1.5rem; } }
+@media (min-width: 1024px) { .grm-container { padding-left: 2rem; padding-right: 2rem; } }
+
+.grm-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 5rem; /* h-20 */
+}
+
+/* Logo */
+.nav-logo-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* gap-3 */
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.nav-logo-img {
+    height: 3rem; /* h-12 */
+    width: 3rem; /* w-12 */
+    border-radius: 9999px; /* rounded-full */
+    border: 1px solid #C69B6D;
+    transition: border-color 0.15s;
+}
+.nav-logo-group:hover .nav-logo-img {
+    border-color: #2563eb;
+}
+
+.nav-logo-text {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #111827;
+    letter-spacing: 0.025em;
+    transition: color 0.15s;
+}
+
+.nav-logo-group:hover .nav-logo-text {
+    color: #1e40af;
+}
+
+/* Desktop Menu */
+.desktop-menu {
+    display: none;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+@media (min-width: 768px) { .desktop-menu { display: flex; margin-left: 2.5rem; } }
+
+.nav-link {
+    color: #4b5563;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.nav-link:hover {
+    color: #1d4ed8;
+    background-color: #f9fafb;
+}
+
+.nav-btn-special {
+    /* margin-left: 1rem; */
+    background-color: #1e3a8a;
+    color: #dbeafe;
+    border: 1px solid #1d4ed8;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.nav-btn-special:hover {
+    background-color: #1e40af;
+    box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.5);
+}
+
+/* Mobile Toggle */
+.mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: #4b5563;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+.mobile-toggle:hover {
+    color: #111827;
+    background-color: #f3f4f6;
+}
+@media (min-width: 768px) { .mobile-toggle { display: none; } }
+
+.mobile-menu {
+    border-bottom: 1px solid #e5e7eb;
+    background-color: white;
+    padding: 0.5rem 0.5rem 0.75rem 0.5rem;
+}
+.mobile-menu.hidden {
+    display: none;
+}
+@media (min-width: 768px) { .mobile-menu { display: none !important; } }
+
+.mobile-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4b5563;
+    text-decoration: none;
+    margin-bottom: 0.25rem;
+}
+.mobile-link:hover {
+    color: #1d4ed8;
+    background-color: #f9fafb;
+}
+.mobile-link.active {
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+/* --- Footer Styles --- */
+.grm-footer {
+    background-color: #000;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    border-top: 1px solid #111827;
+    margin-top: 3rem;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+}
+@media (min-width: 768px) { .footer-content { flex-direction: row; } }
+
+.footer-left {
+    text-align: center;
+}
+@media (min-width: 768px) { .footer-left { text-align: left; } }
+
+.footer-brand {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.footer-copy {
+    font-size: 0.75rem;
+    color: white;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.footer-credit {
+    padding-top: 0.5rem;
+    border-top: 1px solid white;
+    color: #dc2626;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+.footer-credit a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.footer-credit a:hover {
+    color: #818cf8;
+    text-decoration: underline;
+}
+
+.footer-socials {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.social-link {
+    color: white;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+.social-link:hover {
+    color: #818cf8;
+}
+.social-link svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+html {
+    height: 100%;
+}
+
+.grm-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.grm-body > .container {
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+.grm-footer {
+    flex-shrink: 0;
 }

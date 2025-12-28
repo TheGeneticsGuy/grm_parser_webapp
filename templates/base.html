@@ -10,14 +10,21 @@
     <!-- Title block that child templates can override -->
     <title>{% block title %}GRM Log Extractor{% endblock %}</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Your Custom CSS -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon/android-chrome-512x512.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon/favicon-32x32.png') }}" sizes="32x32" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon/favicon-16x16.png') }}" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon/apple-touch-icon.png') }}">
 
     <!-- META properties Facebook -->
     <meta property="og:title" content="GRM Log Extractor">
@@ -34,24 +41,98 @@
     <meta name="twitter:url" content="https://extract.guildrostermanager.com/">
 
 </head>
-<body class="bg-light">
+<body class="bg-light grm-body">
 
-    <div class="container mt-5">
+    <!-- NAV BAR -->
+    <nav class="grm-nav">
+        <div class="grm-container nav-content">
+
+            <!-- Logo -->
+            <a href="https://www.guildrostermanager.com/" class="nav-logo-group">
+                <img class="nav-logo-img" src="{{ url_for('static', filename='images/logo.webp') }}" alt="GRM Logo">
+                <span class="nav-logo-text">Guild Roster Manager</span>
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="desktop-menu">
+                <a href="https://www.guildrostermanager.com/" class="nav-link">Home</a>
+                <a href="https://www.guildrostermanager.com/#features" class="nav-link">Features</a>
+                <a href="https://www.guildrostermanager.com/#modules" class="nav-link">Modules</a>
+                <a href="https://www.guildrostermanager.com/faq" class="nav-link">FAQ</a>
+                <a href="https://www.guildrostermanager.com/changelog" class="nav-link">Changelog</a>
+
+                <!-- Current Page Active State -->
+                <a href="#" class="nav-btn-special">Log Extractor Tool</a>
+            </div>
+
+            <!-- Hamburger Button -->
+            <button id="mobile-menu-btn" type="button" class="mobile-toggle">
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div class="mobile-menu hidden" id="mobile-menu">
+            <a href="https://www.guildrostermanager.com/" class="mobile-link">Home</a>
+            <a href="https://www.guildrostermanager.com/#features" class="mobile-link">Features</a>
+            <a href="https://www.guildrostermanager.com/#modules" class="mobile-link">Modules</a>
+            <a href="https://www.guildrostermanager.com/faq" class="mobile-link">FAQ</a>
+            <a href="https://www.guildrostermanager.com/changelog" class="mobile-link">Changelog</a>
+            <a href="#" class="mobile-link active">Log Extractor Tool</a>
+        </div>
+    </nav>
+
+    <!-- === MAIN CONTENT === -->
+    <div class="container mt-5" style="min-height: 60vh;">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Universal Footer -->
-    <footer class="text-center text-muted py-4 mt-5 bg-body-tertiary">
-        <p>©️<span id="currentyear"></span> | Guild Roster Manager | All rights reserved</p>
-        <p><a href="https://www.curseforge.com/wow/addons/guild-roster-manager" target="_blank">GRM Addon Page</a></p>
+    <!-- === CUSTOM FOOTER === -->
+    <footer class="grm-footer">
+        <div class="grm-container footer-content">
+
+            <!-- Left Side -->
+            <div class="footer-left">
+                <span class="footer-brand">GRM</span>
+                <p class="footer-copy">
+                    &copy; <span id="copyright-year">2026</span> Guild Roster Manager.<br>
+                    Not affiliated with Blizzard Entertainment. This is an independent project.
+                </p>
+                <p class="footer-credit">
+                    Logo by <a href="https://www.darkwolves.eu" target="_blank" rel="noopener">Poisonenvy of the Dark Wolves guild (EU)</a>
+                </p>
+            </div>
+
+            <!-- Discord and Github -->
+            <div class="footer-socials">
+                <a href="https://discord.gg/wA7bPUfZuK" class="social-link">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+                    <span>Discord</span>
+                </a>
+                <a href="https://github.com/TheGeneticsGuy/Guild-Roster-Manager" class="social-link">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+                    <span>GitHub</span>
+                </a>
+            </div>
+        </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Auto update copyright year
+        document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
-
-<script>
-    // Set current year in footer
-    document.getElementById('currentyear').textContent = new Date().getFullYear();
-</script>
